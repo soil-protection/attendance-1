@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduTrack — Attendance Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ░░ SIDEBAR ░░ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-dot"></div>
+    <span>EduTrack</span>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" data-tab="dashboard" onclick="switchTab(this,'dashboard')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" data-tab="students" onclick="switchTab(this,'students')">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.85"/></svg>
+      Students
+    </button>
+    <button class="nav-item" data-tab="attendance" onclick="switchTab(this,'attendance')">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Mark Attendance
+    </button>
+    <button class="nav-item" data-tab="records" onclick="switchTab(this,'records')">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Records
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="db-status" id="db-status">
+      <span class="db-dot"></span>
+      <span id="db-label">Not connected</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ░░ MAIN ░░ -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </button>
+    <h1 class="topbar-title" id="topbar-title">Dashboard</h1>
+    <div class="topbar-right">
+      <span class="date-badge" id="today-date"></span>
+    </div>
+  </header>
+
+  <!-- ══════════ TAB: DASHBOARD ══════════ -->
+  <section class="tab active" id="tab-dashboard">
+    <div class="page-header">
+      <h2>Overview</h2>
+      <p>Your attendance system at a glance</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-tile" id="tile-students">
+        <div class="tile-icon blue">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20v-2a4 4 0 014-4h8a4 4 0 014 4v2"/></svg>
+        </div>
+        <div class="tile-body">
+          <p class="tile-label">Total Students</p>
+          <h3 class="tile-num" id="count-students">0</h3>
+        </div>
+      </div>
+      <div class="stat-tile" id="tile-present">
+        <div class="tile-icon green">
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="tile-body">
+          <p class="tile-label">Present Today</p>
+          <h3 class="tile-num" id="count-present">0</h3>
+        </div>
+      </div>
+      <div class="stat-tile" id="tile-absent">
+        <div class="tile-icon red">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+        <div class="tile-body">
+          <p class="tile-label">Absent Today</p>
+          <h3 class="tile-num" id="count-absent">0</h3>
+        </div>
+      </div>
+      <div class="stat-tile" id="tile-rate">
+        <div class="tile-icon amber">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="tile-body">
+          <p class="tile-label">Avg Attendance</p>
+          <h3 class="tile-num" id="count-rate">—</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent activity -->
+    <div class="card mt24">
+      <div class="card-head">
+        <h3>Recent Activity</h3>
+      </div>
+      <div id="recent-activity" class="empty-state">
+        <div class="empty-icon">📋</div>
+        <p>No activity yet. Add students and mark attendance to see data here.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ TAB: STUDENTS ══════════ -->
+  <section class="tab" id="tab-students">
+    <div class="page-header">
+      <h2>Students</h2>
+      <p>Add and manage your student roster</p>
+    </div>
+
+    <!-- Add Student Form -->
+    <div class="card">
+      <div class="card-head collapsible" onclick="toggleCollapse('add-student-body')">
+        <h3>➕ Add New Student</h3>
+        <svg class="chevron" id="chevron-add-student-body" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="card-body" id="add-student-body">
+        <div class="form-grid">
+          <div class="field">
+            <label>Full Name <span class="req">*</span></label>
+            <input type="text" id="stu-name" placeholder="e.g. Alex Johnson" autocomplete="off"/>
+          </div>
+          <div class="field">
+            <label>Student ID <span class="req">*</span></label>
+            <input type="text" id="stu-id" placeholder="e.g. STU001" autocomplete="off"/>
+          </div>
+          <div class="field">
+            <label>Class <span class="req">*</span></label>
+            <input type="text" id="stu-class" placeholder="e.g. X-A" autocomplete="off"/>
+          </div>
+          <div class="field">
+            <label>Roll Number</label>
+            <input type="text" id="stu-roll" placeholder="e.g. 01" autocomplete="off"/>
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="stu-email" placeholder="student@school.com" autocomplete="off"/>
+          </div>
+          <div class="field">
+            <label>Phone</label>
+            <input type="tel" id="stu-phone" placeholder="+91 98765 43210" autocomplete="off"/>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="addStudent()">Add Student</button>
+      </div>
+    </div>
+
+    <!-- Student List -->
+    <div class="card mt16">
+      <div class="card-head">
+        <h3>Student Roster</h3>
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="search-students" placeholder="Search students…" oninput="filterStudents()"/>
+        </div>
+      </div>
+      <div id="student-roster" class="empty-state">
+        <div class="empty-icon">🎓</div>
+        <p>No students added yet. Use the form above to add your first student.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ TAB: MARK ATTENDANCE ══════════ -->
+  <section class="tab" id="tab-attendance">
+    <div class="page-header">
+      <h2>Mark Attendance</h2>
+      <p>Select a class & date, then mark each student</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Session Setup</h3>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="field">
+            <label>Date <span class="req">*</span></label>
+            <input type="date" id="att-date"/>
+          </div>
+          <div class="field">
+            <label>Subject <span class="req">*</span></label>
+            <input type="text" id="att-subject" placeholder="e.g. Mathematics" autocomplete="off"/>
+          </div>
+          <div class="field">
+            <label>Class <span class="req">*</span></label>
+            <input type="text" id="att-class" placeholder="e.g. X-A" autocomplete="off" oninput="loadClassStudents()"/>
+          </div>
+          <div class="field">
+            <label>Teacher Name</label>
+            <input type="text" id="att-teacher" placeholder="e.g. Dr. Smith" autocomplete="off"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt16" id="attendance-panel" style="display:none">
+      <div class="card-head">
+        <h3 id="att-panel-title">Mark Attendance</h3>
+        <div class="bulk-row">
+          <button class="chip green" onclick="bulkMark('Present')">✓ All Present</button>
+          <button class="chip red"   onclick="bulkMark('Absent')">✗ All Absent</button>
+        </div>
+      </div>
+      <div id="att-list" class="att-list"></div>
+      <div class="card-footer">
+        <button class="btn-primary" onclick="submitAttendance()">Save Attendance</button>
+      </div>
+    </div>
+
+    <div id="att-empty" class="card mt16">
+      <div class="empty-state">
+        <div class="empty-icon">✏️</div>
+        <p>Fill in the session details above and enter a class name to load students.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ TAB: RECORDS ══════════ -->
+  <section class="tab" id="tab-records">
+    <div class="page-header">
+      <h2>Attendance Records</h2>
+      <p>View, filter and export all records</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Filters</h3>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="field">
+            <label>Student ID</label>
+            <input type="text" id="filter-student" placeholder="e.g. STU001" oninput="applyFilters()"/>
+          </div>
+          <div class="field">
+            <label>Subject</label>
+            <input type="text" id="filter-subject" placeholder="e.g. Mathematics" oninput="applyFilters()"/>
+          </div>
+          <div class="field">
+            <label>From Date</label>
+            <input type="date" id="filter-from" onchange="applyFilters()"/>
+          </div>
+          <div class="field">
+            <label>To Date</label>
+            <input type="date" id="filter-to" onchange="applyFilters()"/>
+          </div>
+        </div>
+        <button class="btn-ghost" onclick="clearFilters()">Clear Filters</button>
+      </div>
+    </div>
+
+    <div class="card mt16">
+      <div class="card-head">
+        <h3>All Records</h3>
+        <span class="badge" id="record-count">0 records</span>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table" id="records-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Student</th>
+              <th>Student ID</th>
+              <th>Subject</th>
+              <th>Class</th>
+              <th>Status</th>
+              <th>Teacher</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="records-tbody">
+            <tr><td colspan="8" class="table-empty">No records yet. Mark attendance to see data here.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ░░ TOAST ░░ -->
+<div id="toast" class="toast"></div>
+
+<!-- ░░ CONFIRM MODAL ░░ -->
+<div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="modal-title">Confirm</h3>
+    <p id="modal-msg">Are you sure?</p>
+    <div class="modal-btns">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-danger" id="modal-confirm-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
